@@ -38,6 +38,12 @@ func (m *MP4Reader) ReadBoxData(b *Box) (data []byte, err error) {
 	return m.readNBytesAt(b.DataSize, b.DataOffset)
 }
 
+func (m *MP4Reader) ReadNestedBoxes(b *Box) (boxes []*Box, err error) {
+	// return m.readNBytesAt(b.DataSize, b.DataOffset)
+	return m.parse(b.DataOffset, b.DataOffset+b.DataSize)
+	// return
+}
+
 // readNBytesAt reads bytes from [offset, offset+n).
 func (m *MP4Reader) readNBytesAt(n int64, offset int64) (data []byte, err error) {
 	data = make([]byte, n)
@@ -77,21 +83,19 @@ func (m *MP4Reader) readBox(offset int64) (b *Box, err error) {
 	return
 }
 
-func (m *MP4Reader) parse() (err error) {
-	var (
-		pivot = int64(0)
-		b     *Box
-	)
+func (m *MP4Reader) parse(start, end int64) (boxes []*Box, err error) {
+	var b *Box
+	boxes = make([]*Box, 0)
 
 	for {
-		b, err = m.readBox(pivot)
+		b, err = m.readBox(start)
 		if err != nil {
 			return
 		}
 
-		m.Boxes = append(m.Boxes, b)
-		pivot += b.Size
-		if pivot >= m.size {
+		boxes = append(boxes, b)
+		start += b.Size
+		if start >= end {
 			break
 		}
 	}
@@ -112,11 +116,10 @@ func Open(path string) (r *MP4Reader, err error) {
 	}
 
 	r = &MP4Reader{
-		r:     file,
-		size:  info.Size(),
-		Boxes: make([]*Box, 0),
+		r:    file,
+		size: info.Size(),
 	}
-	err = r.parse()
+	r.Boxes, err = r.parse(0, r.size)
 
 	return
 }

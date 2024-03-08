@@ -15,13 +15,22 @@ func run(filename string) error {
 
 	for i, b := range f.Boxes {
 		fmt.Println(i, b.Repr())
-		if b.Type == gomp4.BoxFTyp {
+		switch b.Type {
+		case gomp4.BoxFTyp:
 			data, err := f.ReadBoxData(b)
 			if err != nil {
 				return err
 			}
 			ftyp := gomp4.ParseFTyp(data)
 			fmt.Println(ftyp.Repr())
+		case gomp4.BoxMoov:
+			mbs, err := f.ReadNestedBoxes(b)
+			if err != nil {
+				return err
+			}
+			for j, mb := range mbs {
+				fmt.Println("--|", j, mb.Repr())
+			}
 		}
 	}
 

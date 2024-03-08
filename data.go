@@ -7,6 +7,7 @@ import (
 
 const (
 	BoxFTyp = "ftyp"
+	BoxMoov = "moov"
 )
 
 // FTyp is the FileType Data.
