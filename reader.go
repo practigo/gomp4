@@ -33,7 +33,7 @@ type MP4Reader struct {
 	Boxes []*Box
 }
 
-// ReadBoxData ...
+// ReadBoxData reads the data bytes pointed by the box b.
 func (m *MP4Reader) ReadBoxData(b *Box) (data []byte, err error) {
 	return m.readNBytesAt(b.DataSize, b.DataOffset)
 }

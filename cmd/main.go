@@ -15,6 +15,14 @@ func run(filename string) error {
 
 	for i, b := range f.Boxes {
 		fmt.Println(i, b.Repr())
+		if b.Type == gomp4.BoxFTyp {
+			data, err := f.ReadBoxData(b)
+			if err != nil {
+				return err
+			}
+			ftyp := gomp4.ParseFTyp(data)
+			fmt.Println(ftyp.Repr())
+		}
 	}
 
 	return nil
