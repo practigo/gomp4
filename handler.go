@@ -19,12 +19,25 @@ func View(br BoxReader) error {
 		prefix := strings.Repeat("--|", int(b.Depth+1)) // depth starts from 0
 		boxTreeView = append(boxTreeView, fmt.Sprintf("%s box %s @%d: data ~ [%d (+%d), %d)\n", prefix, b.Type, b.At, dr.Start, dr.Size(), dr.End))
 		// data example
-		if b.Type == BoxFTyp {
+		switch b.Type {
+		case BoxFTyp:
 			ftypData, err := br.ReadData(b)
 			if err != nil {
 				return err
 			}
 			boxTreeView = append(boxTreeView, ParseFTyp(ftypData).Repr())
+		case BoxMvhd:
+			mvhdData, err := br.ReadData(b)
+			if err != nil {
+				return err
+			}
+			boxTreeView = append(boxTreeView, ParseMvhd(mvhdData).Repr())
+		case BoxTkhd:
+			tkhdData, err := br.ReadData(b)
+			if err != nil {
+				return err
+			}
+			boxTreeView = append(boxTreeView, ParseTkhd(tkhdData).Repr())
 		}
 		return nil
 	}
