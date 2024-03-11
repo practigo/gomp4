@@ -110,6 +110,9 @@ func ReadBox(r io.ReaderAt, offset int64) (b *Box, err error) {
 func DefaultNested() map[string]bool {
 	return map[string]bool{
 		BoxMoov: true,
+		BoxTrak: true,
+		BoxMdia: true,
+		BoxMinf: true,
 	}
 }
 

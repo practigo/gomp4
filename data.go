@@ -8,6 +8,11 @@ import (
 const (
 	BoxFTyp = "ftyp"
 	BoxMoov = "moov"
+	BoxMvhd = "mvhd"
+	BoxTrak = "trak"
+	BoxTkhd = "tkhd"
+	BoxMdia = "mdia"
+	BoxMinf = "minf"
 )
 
 // FTyp is the FileType Data.
