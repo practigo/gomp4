@@ -3,6 +3,7 @@ package gomp4
 import (
 	"encoding/binary"
 	"fmt"
+	"strings"
 )
 
 const (
@@ -15,6 +16,21 @@ const (
 	BoxMinf = "minf"
 )
 
+type BoxData interface {
+	// Repr returns a string representation of the box data.
+	Repr(prefix string) string
+}
+
+func dataStr(lines []string, prefix string) string {
+	new_lines := []string{prefix + " =="}
+	new_lines = append(new_lines, lines...)
+	new_lines = append(new_lines, "==\n")
+	return strings.Join(new_lines, "\n"+prefix+" ")
+}
+
+// DataParser ...
+type DataParser func(data []byte) BoxData
+
 // FTyp is the FileType Data.
 // Container: File
 // Mandatory: Yes
@@ -25,18 +41,17 @@ type FTyp struct {
 	CompatibleBrands []string // A list, to the end of the box, of brands.
 }
 
-func (b *FTyp) Repr() string {
-	return fmt.Sprintf(`
-- FileType data
-| major_brand: %s
-| minor_version: %d
-| compatible_brands: %v
-`, b.MajorBrand, b.MinorVersion, b.CompatibleBrands)
+func (b *FTyp) Repr(prefix string) string {
+	return dataStr([]string{
+		"FileType data:",
+		fmt.Sprintf("major_brand: %s, minor_version: %d", b.MajorBrand, b.MinorVersion),
+		fmt.Sprintf("compatible_brands: %v", b.CompatibleBrands),
+	}, prefix)
 }
 
 // ParseFTyp parses the FileType box data.
-func ParseFTyp(data []byte) (b *FTyp) {
-	b = &FTyp{}
+func ParseFtyp(data []byte) BoxData {
+	b := &FTyp{}
 	b.MajorBrand = string(data[0:4])
 	b.MinorVersion = binary.BigEndian.Uint32(data[4:8])
 	if len(data) > 8 {
@@ -44,7 +59,7 @@ func ParseFTyp(data []byte) (b *FTyp) {
 			b.CompatibleBrands = append(b.CompatibleBrands, string(data[i:i+4]))
 		}
 	}
-	return
+	return b
 }
 
 // Mvhd is the Movie Header Box data.
@@ -61,18 +76,17 @@ type Mvhd struct {
 	// others: TODO:
 }
 
-func (b *Mvhd) Repr() string {
-	return fmt.Sprintf(`
-- MovieHeader data
-| version: %d, flags: %08b,
-| create: %d, modify: %d
-| timeScale: %d, duration %d
-`, b.Version, b.Flags, b.CreationTime, b.ModificationTime, b.Timescale, b.Duration)
+func (b *Mvhd) Repr(prefix string) string {
+	return dataStr([]string{
+		"MovieHeader data:",
+		fmt.Sprintf("version: %d, flags: %08b, create: %d, modify: %d", b.Version, b.Flags, b.CreationTime, b.ModificationTime),
+		fmt.Sprintf("timeScale: %d, duration %d", b.Timescale, b.Duration),
+	}, prefix)
 }
 
 // ParseMvhd ...
-func ParseMvhd(data []byte) (b *Mvhd) {
-	b = &Mvhd{
+func ParseMvhd(data []byte) BoxData {
+	b := &Mvhd{
 		Version: uint8(data[0]),
 		Flags:   data[1:4],
 	}
@@ -107,18 +121,17 @@ type Tkhd struct {
 	Width, Height    uint32
 }
 
-func (b *Tkhd) Repr() string {
-	return fmt.Sprintf(`
-- TrackHeader data
-| version: %d, flags: %08b,
-| create: %d, modify: %d
-| trackID: %d, duration %d, WxH: %dx%d
-`, b.Version, b.Flags, b.CreationTime, b.ModificationTime, b.TrackID, b.Duration, b.Width, b.Height)
+func (b *Tkhd) Repr(prefix string) string {
+	return dataStr([]string{
+		"TrackHeader data:",
+		fmt.Sprintf("version: %d, flags: %08b, create: %d, modify: %d", b.Version, b.Flags, b.CreationTime, b.ModificationTime),
+		fmt.Sprintf("trackID: %d, duration %d, WxH: %dx%d", b.TrackID, b.Duration, b.Width, b.Height),
+	}, prefix)
 }
 
 // ParseTkhd ...
-func ParseTkhd(data []byte) (b *Tkhd) {
-	b = &Tkhd{
+func ParseTkhd(data []byte) BoxData {
+	b := &Tkhd{
 		Version: uint8(data[0]),
 		Flags:   data[1:4],
 	}

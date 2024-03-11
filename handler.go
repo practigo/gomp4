@@ -5,6 +5,12 @@ import (
 	"strings"
 )
 
+var dataHandler = map[string]DataParser{
+	BoxFTyp: ParseFtyp,
+	BoxMvhd: ParseMvhd,
+	BoxTkhd: ParseTkhd,
+}
+
 // View prints the box-tree structure.
 func View(br BoxReader) error {
 	boxes, err := br.GetBoxes()
@@ -18,26 +24,14 @@ func View(br BoxReader) error {
 		dr := b.DataRange()
 		prefix := strings.Repeat("--|", int(b.Depth+1)) // depth starts from 0
 		boxTreeView = append(boxTreeView, fmt.Sprintf("%s box %s @%d: data ~ [%d (+%d), %d)\n", prefix, b.Type, b.At, dr.Start, dr.Size(), dr.End))
-		// data example
-		switch b.Type {
-		case BoxFTyp:
-			ftypData, err := br.ReadData(b)
+		// data parse
+		if dp, ok := dataHandler[b.Type]; ok {
+			data, err := br.ReadData(b)
 			if err != nil {
 				return err
 			}
-			boxTreeView = append(boxTreeView, ParseFTyp(ftypData).Repr())
-		case BoxMvhd:
-			mvhdData, err := br.ReadData(b)
-			if err != nil {
-				return err
-			}
-			boxTreeView = append(boxTreeView, ParseMvhd(mvhdData).Repr())
-		case BoxTkhd:
-			tkhdData, err := br.ReadData(b)
-			if err != nil {
-				return err
-			}
-			boxTreeView = append(boxTreeView, ParseTkhd(tkhdData).Repr())
+			bd := dp(data)
+			boxTreeView = append(boxTreeView, bd.Repr(prefix))
 		}
 		return nil
 	}
