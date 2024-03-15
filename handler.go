@@ -9,6 +9,7 @@ var dataHandler = map[string]DataParser{
 	BoxFTyp: ParseFtyp,
 	BoxMvhd: ParseMvhd,
 	BoxTkhd: ParseTkhd,
+	BoxMdhd: ParseMdhd,
 }
 
 // View prints the box-tree structure.

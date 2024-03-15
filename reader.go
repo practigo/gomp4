@@ -113,6 +113,8 @@ func DefaultNested() map[string]bool {
 		BoxTrak: true,
 		BoxMdia: true,
 		BoxMinf: true,
+		BoxStbl: true,
+		BoxEdts: true,
 	}
 }
 
